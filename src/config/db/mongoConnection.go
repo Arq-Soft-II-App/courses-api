@@ -12,16 +12,15 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var once sync.Once           // variable para asegurarse de que el codigo de conexion a la base de datos se ejecute solo una vez
-var dbInstance *mongo.Client // variable para almacenar la instancia de la base de datos
+var once sync.Once
+var dbInstance *mongo.Client
 
-// conexion con MongoDB utilizando singleton
 func ConnectDB() (*mongo.Client, error) {
 	var err error
 	env := envs.LoadEnvs(".env")
 	MONGO_URI := env.Get("MONGO_URI")
 
-	once.Do(func() { // se asegura de que el codigo de conexion a la base de datos se ejecute solo una vez
+	once.Do(func() {
 		clientOptions := options.Client().ApplyURI(MONGO_URI)
 
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -32,7 +31,6 @@ func ConnectDB() (*mongo.Client, error) {
 			log.Fatalf("Error al conectar con MongoDB: %v", err)
 		}
 
-		// verifica la conexion
 		err = dbInstance.Ping(ctx, nil)
 		if err != nil {
 			log.Fatalf("No se pudo conectar a MongoDB: %v", err)
