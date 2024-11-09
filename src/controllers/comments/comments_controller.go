@@ -1,6 +1,6 @@
 package comments
 
-/* import (
+import (
 	dto "courses-api/src/dto/comments"
 	"courses-api/src/services"
 	"net/http"
@@ -44,4 +44,3 @@ func (c *CommentsController) NewComment(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusCreated, comment)
 }
-*/
