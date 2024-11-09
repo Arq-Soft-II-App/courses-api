@@ -11,15 +11,13 @@ import (
 
 // CommentsService define el servicio para manejar comentarios
 type CommentsService struct {
-	client      comments.CommentsClientInterface
-	usersClient UsersClientInterface // Interfaz para obtener información del usuario
+	client comments.CommentsClientInterface
 }
 
 // NewCommentsService inicializa un nuevo servicio de comentarios
-func NewCommentsService(client comments.CommentsClientInterface, usersClient UsersClientInterface) CommentsInterface {
+func NewCommentsService(client comments.CommentsClientInterface) CommentsInterface {
 	return &CommentsService{
-		client:      client,
-		usersClient: usersClient,
+		client: client,
 	}
 }
 
@@ -68,16 +66,9 @@ func (s *CommentsService) GetCourseComments(ctx context.Context, courseID string
 
 	response := make(dto.GetCommentsResponse, len(comments))
 	for i, comment := range comments {
-		user, err := s.usersClient.GetUser(ctx, comment.UserId) // Obtener datos del usuario
-		if err != nil {
-			return nil, err
-		}
-
 		response[i] = dto.CommentResponse{
-			Text:       comment.Text,
-			UserId:     comment.UserId,
-			UserName:   user.Name,
-			UserAvatar: user.Avatar,
+			Text:   comment.Text,
+			UserId: comment.UserId,
 		}
 	}
 
