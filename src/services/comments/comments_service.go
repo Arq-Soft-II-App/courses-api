@@ -3,34 +3,30 @@ package comments
 import (
 	"context"
 	"courses-api/src/clients/comments"
-	dto "courses-api/src/dto/comments"
+	Comments_Dto "courses-api/src/dto/comments"
 	"courses-api/src/models"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// CommentsService define el servicio para manejar comentarios
 type CommentsService struct {
 	client comments.CommentsClientInterface
 }
 
-// NewCommentsService inicializa un nuevo servicio de comentarios
 func NewCommentsService(client comments.CommentsClientInterface) CommentsInterface {
 	return &CommentsService{
 		client: client,
 	}
 }
 
-// CommentsInterface define la interfaz para el servicio de comentarios
 type CommentsInterface interface {
-	NewComment(ctx context.Context, dto *dto.CommentsDto) (*dto.CommentResponse, error)
-	GetCourseComments(ctx context.Context, courseID string) (dto.GetCommentsResponse, error)
-	UpdateComment(ctx context.Context, dto *dto.CommentsDto) (*dto.CommentResponse, error)
+	NewComment(ctx context.Context, dto *Comments_Dto.CommentsDto) (*Comments_Dto.CommentResponse, error)
+	GetCourseComments(ctx context.Context, courseID string) (Comments_Dto.GetCommentsResponse, error)
+	UpdateComment(ctx context.Context, dto *Comments_Dto.CommentsDto) (*Comments_Dto.CommentResponse, error)
 }
 
-// NewComment crea un nuevo comentario
-func (s *CommentsService) NewComment(ctx context.Context, dto *dto.CommentsDto) (*dto.CommentResponse, error) {
-	courseID, err := primitive.ObjectIDFromHex(dto.CourseId)
+func (s *CommentsService) NewComment(ctx context.Context, dto *Comments_Dto.CommentsDto) (*Comments_Dto.CommentResponse, error) {
+	courseID, err := primitive.ObjectIDFromHex(dto.CourseId.Hex())
 	if err != nil {
 		return nil, err
 	}
@@ -46,14 +42,13 @@ func (s *CommentsService) NewComment(ctx context.Context, dto *dto.CommentsDto) 
 		return nil, err
 	}
 
-	return &dto.CommentResponse{
+	return &Comments_Dto.CommentResponse{
 		Text:   createdComment.Text,
 		UserId: createdComment.UserId,
 	}, nil
 }
 
-// GetCourseComments obtiene los comentarios de un curso específico
-func (s *CommentsService) GetCourseComments(ctx context.Context, courseID string) (dto.GetCommentsResponse, error) {
+func (s *CommentsService) GetCourseComments(ctx context.Context, courseID string) (Comments_Dto.GetCommentsResponse, error) {
 	courseObjectID, err := primitive.ObjectIDFromHex(courseID)
 	if err != nil {
 		return nil, err
@@ -64,9 +59,9 @@ func (s *CommentsService) GetCourseComments(ctx context.Context, courseID string
 		return nil, err
 	}
 
-	response := make(dto.GetCommentsResponse, len(comments))
+	response := make(Comments_Dto.GetCommentsResponse, len(comments))
 	for i, comment := range comments {
-		response[i] = dto.CommentResponse{
+		response[i] = Comments_Dto.CommentResponse{
 			Text:   comment.Text,
 			UserId: comment.UserId,
 		}
@@ -75,18 +70,16 @@ func (s *CommentsService) GetCourseComments(ctx context.Context, courseID string
 	return response, nil
 }
 
-// UpdateComment actualiza un comentario existente
-func (s *CommentsService) UpdateComment(ctx context.Context, dto *dto.CommentsDto) (*dto.CommentResponse, error) {
-	commentID, err := primitive.ObjectIDFromHex(dto.ID.Hex())
+func (s *CommentsService) UpdateComment(ctx context.Context, dto *Comments_Dto.CommentsDto) (*Comments_Dto.CommentResponse, error) {
+	CourseId, err := primitive.ObjectIDFromHex(dto.CourseId.Hex())
 	if err != nil {
 		return nil, err
 	}
 
 	comment := models.Comment{
-		ID:       commentID,
 		Text:     dto.Text,
 		UserId:   dto.UserId,
-		CourseId: commentID,
+		CourseId: CourseId,
 	}
 
 	updatedComment, err := s.client.UpdateComment(ctx, comment)
@@ -94,7 +87,7 @@ func (s *CommentsService) UpdateComment(ctx context.Context, dto *dto.CommentsDt
 		return nil, err
 	}
 
-	return &dto.CommentResponse{
+	return &Comments_Dto.CommentResponse{
 		Text:   updatedComment.Text,
 		UserId: updatedComment.UserId,
 	}, nil

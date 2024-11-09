@@ -5,7 +5,7 @@ import "go.mongodb.org/mongo-driver/bson/primitive"
 // CommentsDto representa la estructura para la creación de comentarios
 type CommentsDto struct {
 	ID       primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
-	CourseId string             `json:"course_id"`
+	CourseId primitive.ObjectID `json:"course_id"`
 	UserId   string             `json:"user_id"`
 	Text     string             `json:"text"`
 }

@@ -11,6 +11,7 @@ import (
 type CategoriesClient struct {
 	collection *mongo.Collection
 }
+
 type CategoryClientInterface interface {
 	Create(ctx context.Context, category *models.Category) error
 	GetAll(ctx context.Context) ([]models.Category, error)

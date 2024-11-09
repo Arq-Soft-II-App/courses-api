@@ -12,6 +12,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+type CourseClient struct {
+	collection *mongo.Collection
+}
+
 type CourseClientInterface interface {
 	Create(ctx context.Context, course models.Course) (*models.Course, error)
 	GetAll(ctx context.Context) (models.Courses, error)
@@ -20,11 +24,7 @@ type CourseClientInterface interface {
 	Delete(ctx context.Context, id primitive.ObjectID) (string, error)
 }
 
-type CourseClient struct {
-	collection *mongo.Collection
-}
-
-func NewCourseClient(db *mongo.Database) *CourseClient {
+func NewCourseClient(db *mongo.Database) CourseClientInterface {
 	return &CourseClient{
 		collection: db.Collection("courses"),
 	}

@@ -2,17 +2,17 @@ package comments
 
 import (
 	dto "courses-api/src/dto/comments"
-	"courses-api/src/services"
+	"courses-api/src/services/comments"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 type CommentsController struct {
-	service *services.CommentsServiceInterface
+	service comments.CommentsInterface
 }
 
-func NewCommentsController(service *services.CommentsServiceInterface) *CommentsController {
+func NewCommentsController(service comments.CommentsInterface) *CommentsController {
 	return &CommentsController{
 		service: service,
 	}
@@ -21,26 +21,48 @@ func NewCommentsController(service *services.CommentsServiceInterface) *Comments
 type CommentsControllerInterface interface {
 	NewComment(c *gin.Context)
 	GetCourseComments(c *gin.Context)
+	UpdateComment(c *gin.Context)
 }
 
-func (c *CommentsController) NewComment(ctx *gin.Context) {
-	newCommentDTO := &dto.CommentsDto{}
-	if err := ctx.BindJSON(newCommentDTO); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid request body",
-			"code":  "INVALID_REQUEST",
-		})
+func (cc *CommentsController) NewComment(c *gin.Context) {
+	var commentDTO dto.CommentsDto
+	if err := c.ShouldBindJSON(&commentDTO); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
-	comment, err := c.service.NewComment(*newCommentDTO)
+	newComment, err := cc.service.NewComment(c.Request.Context(), &commentDTO)
 	if err != nil {
-		if customError, ok := err.(*errors.CustomError); ok {
-			ctx.JSON(customError.Code, gin.H{
-				"error": customError.Message,
-				"code":  customError.Code,
-			})
-		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
 
-	ctx.JSON(http.StatusCreated, comment)
+	c.JSON(http.StatusCreated, newComment)
+}
+
+func (cc *CommentsController) GetCourseComments(c *gin.Context) {
+	courseID := c.Param("course_id")
+	comments, err := cc.service.GetCourseComments(c.Request.Context(), courseID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, comments)
+}
+
+func (cc *CommentsController) UpdateComment(c *gin.Context) {
+	var commentDTO dto.CommentsDto
+	if err := c.ShouldBindJSON(&commentDTO); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	updatedComment, err := cc.service.UpdateComment(c.Request.Context(), &commentDTO)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, updatedComment)
 }

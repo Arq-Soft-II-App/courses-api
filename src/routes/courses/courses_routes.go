@@ -1,15 +1,15 @@
 package courses
 
 import (
-	"courses-api/src/controllers/courses"
+	"courses-api/src/controllers"
 
 	"github.com/gin-gonic/gin"
 )
 
-func CoursesRoutes(g *gin.RouterGroup, controller courses.CoursesControllerInterface) {
-	g.POST("/", controller.CreateCourse)
-	g.GET("/", controller.GetAllCourses)
-	g.GET("/:id", controller.GetCourseById)
-	g.PUT("/:id", controller.UpdateCourse)
-	g.DELETE("/:id", controller.DeleteCourse)
+func CoursesRoutes(g *gin.RouterGroup, controller controllers.Controllers) {
+	g.POST("/", controller.Courses.CreateCourse)
+	g.GET("/", controller.Courses.GetAllCourses)
+	g.GET("/:id", controller.Courses.GetCourseById)
+	g.PUT("/:id", controller.Courses.UpdateCourse)
+	g.DELETE("/:id", controller.Courses.DeleteCourse)
 }

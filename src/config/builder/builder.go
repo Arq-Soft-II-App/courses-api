@@ -27,7 +27,7 @@ func NewAppBuilder() *AppBuilder {
 	return &AppBuilder{}
 }
 
-func BuildApp() (*AppBuilder, error) {
+func BuildApp() *AppBuilder {
 	builder := NewAppBuilder()
 	builder.envs = envs.LoadEnvs()
 	return builder.
@@ -63,10 +63,10 @@ func (b *AppBuilder) BuildControllers() *AppBuilder {
 	return b
 }
 
-func (b *AppBuilder) BuildRouter() (*AppBuilder, error) {
+func (b *AppBuilder) BuildRouter() *AppBuilder {
 	b.router = gin.Default()
-	routes.SetupRoutes(b.router, b.controllers)
-	return b, nil
+	routes.SetupRoutes(b.router, *b.controllers)
+	return b
 }
 
 func (b *AppBuilder) GetRouter() *gin.Engine {

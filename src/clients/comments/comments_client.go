@@ -28,7 +28,6 @@ func NewCommentsClient(db *mongo.Database) CommentsClientInterface {
 	}
 }
 
-// NewComment inserta un nuevo comentario y devuelve el comentario creado
 func (c *CommentsClient) NewComment(ctx context.Context, comment *models.Comment) (models.Comment, error) {
 	result, err := c.collection.InsertOne(ctx, comment)
 	if err != nil {
@@ -36,11 +35,9 @@ func (c *CommentsClient) NewComment(ctx context.Context, comment *models.Comment
 	}
 
 	comment.ID = result.InsertedID.(primitive.ObjectID)
-
 	return *comment, nil
 }
 
-// GetCourseComments obtiene todos los comentarios de un curso específico
 func (c *CommentsClient) GetCourseComments(ctx context.Context, courseID primitive.ObjectID) ([]models.Comment, error) {
 	filter := bson.M{"course_id": courseID}
 	cursor, err := c.collection.Find(ctx, filter)
@@ -56,10 +53,9 @@ func (c *CommentsClient) GetCourseComments(ctx context.Context, courseID primiti
 	return comments, nil
 }
 
-// UpdateComment actualiza un comentario existente y devuelve el comentario actualizado
 func (c *CommentsClient) UpdateComment(ctx context.Context, comment models.Comment) (*models.Comment, error) {
-	filter := bson.M{"_id": comment.ID}
-	update := bson.M{"$set": comment}
+	filter := bson.M{"course_id": comment.CourseId, "user_id": comment.UserId}
+	update := bson.M{"$set": bson.M{"text": comment.Text}}
 	opts := options.FindOneAndUpdate().SetReturnDocument(options.After)
 	result := c.collection.FindOneAndUpdate(ctx, filter, update, opts)
 	if err := result.Err(); err != nil {
