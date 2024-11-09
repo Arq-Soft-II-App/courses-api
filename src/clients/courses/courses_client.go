@@ -17,6 +17,7 @@ type CourseClientInterface interface {
 	GetAll(ctx context.Context) (models.Courses, error)
 	GetById(ctx context.Context, id primitive.ObjectID) (*models.Course, error)
 	Update(ctx context.Context, id primitive.ObjectID, course models.Course) (*models.Course, error)
+	Delete(ctx context.Context, id primitive.ObjectID) (string, error)
 }
 
 type CourseClient struct {
@@ -111,6 +112,14 @@ func (c *CourseClient) Update(ctx context.Context, id primitive.ObjectID, course
 	}
 
 	return &updatedCourse, nil
+}
+
+func (c *CourseClient) Delete(ctx context.Context, id primitive.ObjectID) (string, error) {
+	_, err := c.collection.DeleteOne(ctx, bson.M{"_id": id})
+	if err != nil {
+		return "", errors.NewError("COURSE_DELETE_FAILED", fmt.Sprintf("Error al eliminar el curso: %v", err), 500)
+	}
+	return fmt.Sprintf("Curso %s eliminado", id.Hex()), nil
 }
 
 // buildCoursePipeline construye el pipeline de agregación para obtener cursos.

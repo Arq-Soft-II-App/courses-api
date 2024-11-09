@@ -9,7 +9,7 @@ import (
 )
 
 type CategoriesController struct {
-	service *categories.CategoriesService
+	service categories.CategoryInterface
 }
 
 type CategoriesControllerInterface interface {
@@ -17,7 +17,7 @@ type CategoriesControllerInterface interface {
 	GetCategories(ctx *gin.Context)
 }
 
-func NewCategoriesController(service *categories.CategoriesService) *CategoriesController {
+func NewCategoriesController(service categories.CategoryInterface) CategoriesControllerInterface {
 	return &CategoriesController{
 		service: service,
 	}

@@ -8,7 +8,7 @@ type BaseCourseDto struct {
 	CourseCapacity    int     `json:"capacity"`
 	CategoryID        string  `json:"category_id"`
 	CourseInitDate    string  `json:"init_date"`
-	CourseState       bool    `json:"state"`
+	CourseState       *bool   `json:"state"`
 	CourseImage       string  `json:"image"`
 }
 

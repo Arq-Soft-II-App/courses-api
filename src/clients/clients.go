@@ -8,8 +8,8 @@ import (
 )
 
 type Clients struct {
-	Categories *categories.CategoriesClient
-	Courses    *courses.CourseClient
+	Categories categories.CategoryClientInterface
+	Courses    courses.CourseClientInterface
 }
 
 func NewClients(db *mongo.Database) *Clients {

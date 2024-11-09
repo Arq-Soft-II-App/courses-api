@@ -8,13 +8,18 @@ import (
 )
 
 type CategoriesService struct {
-	client *categories.CategoriesClient
+	client categories.CategoryClientInterface
 }
 
-func NewCategoriesService(client *categories.CategoriesClient) *CategoriesService {
+func NewCategoriesService(client categories.CategoryClientInterface) CategoryInterface {
 	return &CategoriesService{
 		client: client,
 	}
+}
+
+type CategoryInterface interface {
+	Create(ctx context.Context, dto *dto.CategoryDto) error
+	GetAll(ctx context.Context) (dto.GetCategoriesResponse, error)
 }
 
 func (s *CategoriesService) Create(ctx context.Context, dto *dto.CategoryDto) error {
