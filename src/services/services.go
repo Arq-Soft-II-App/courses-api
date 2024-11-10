@@ -17,9 +17,9 @@ type Services struct {
 
 func NewServices(clients *clients.Clients) *Services {
 	return &Services{
-		Categories: categories.NewCategoriesService(clients.Categories),
-		Courses:    courses.NewCoursesService(clients.Courses),
-		Comments:   comments.NewCommentsService(clients.Comments),
-		Ratings:    ratings.NewRatingsService(clients.Ratings),
+		Categories: categories.NewCategoriesService(clients),
+		Courses:    courses.NewCoursesService(clients),
+		Comments:   comments.NewCommentsService(clients),
+		Ratings:    ratings.NewRatingsService(clients),
 	}
 }

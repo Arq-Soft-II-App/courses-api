@@ -2,7 +2,7 @@ package courses
 
 import (
 	"context"
-	"courses-api/src/clients/courses"
+	"courses-api/src/clients"
 	dto "courses-api/src/dto/courses"
 	"courses-api/src/models"
 
@@ -18,12 +18,12 @@ type CourseInterface interface {
 }
 
 type CoursesService struct {
-	client courses.CourseClientInterface
+	clients *clients.Clients
 }
 
-func NewCoursesService(client courses.CourseClientInterface) CourseInterface {
+func NewCoursesService(clients *clients.Clients) CourseInterface {
 	return &CoursesService{
-		client: client,
+		clients: clients,
 	}
 }
 
@@ -56,7 +56,7 @@ func (s *CoursesService) Create(ctx context.Context, courseDto *dto.CreateCourse
 		CategoryID:        categoryId,
 	}
 
-	createdCourse, err := s.client.Create(ctx, course)
+	createdCourse, err := s.clients.Courses.Create(ctx, course)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +68,7 @@ func (s *CoursesService) Create(ctx context.Context, courseDto *dto.CreateCourse
 }
 
 func (s *CoursesService) GetAll(ctx context.Context) (dto.GetAllCourses, error) {
-	courses, err := s.client.GetAll(ctx)
+	courses, err := s.clients.Courses.GetAll(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +91,7 @@ func (s *CoursesService) GetById(ctx context.Context, id string) (*dto.GetCourse
 		return nil, err
 	}
 
-	course, err := s.client.GetById(ctx, objectId)
+	course, err := s.clients.Courses.GetById(ctx, objectId)
 	if err != nil {
 		return nil, err
 	}
@@ -110,7 +110,7 @@ func (s *CoursesService) Update(ctx context.Context, courseDto *dto.UpdateCourse
 		return nil, err
 	}
 
-	originalCourse, err := s.client.GetById(ctx, objectId)
+	originalCourse, err := s.clients.Courses.GetById(ctx, objectId)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +136,7 @@ func (s *CoursesService) Update(ctx context.Context, courseDto *dto.UpdateCourse
 		updatedCourse.CategoryID = categoryId
 	}
 
-	updatedCourseResult, err := s.client.Update(ctx, objectId, updatedCourse)
+	updatedCourseResult, err := s.clients.Courses.Update(ctx, objectId, updatedCourse)
 	if err != nil {
 		return nil, err
 	}
@@ -155,7 +155,7 @@ func (s *CoursesService) Delete(ctx context.Context, id string) (string, error) 
 		return "", err
 	}
 
-	return s.client.Delete(ctx, objectId)
+	return s.clients.Courses.Delete(ctx, objectId)
 }
 
 func mapCourseToBaseDto(course models.Course) dto.BaseCourseDto {
@@ -180,6 +180,7 @@ func getUpdatedValue[T comparable](newValue, originalValue T) T {
 	}
 	return newValue
 }
+
 func getUpdatedBoolValue(newValue *bool, originalValue bool) bool {
 	if newValue != nil {
 		return *newValue

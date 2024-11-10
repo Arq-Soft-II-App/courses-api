@@ -2,35 +2,43 @@ package categories
 
 import (
 	"context"
-	"courses-api/src/clients/categories"
+	"courses-api/src/clients"
 	dto "courses-api/src/dto/categories"
 	"courses-api/src/models"
 )
 
 type CategoriesService struct {
-	client categories.CategoryClientInterface
+	clients *clients.Clients
 }
 
-func NewCategoriesService(client categories.CategoryClientInterface) CategoryInterface {
+func NewCategoriesService(clients *clients.Clients) CategoryInterface {
 	return &CategoriesService{
-		client: client,
+		clients: clients,
 	}
 }
 
 type CategoryInterface interface {
-	Create(ctx context.Context, dto *dto.CategoryDto) error
+	Create(ctx context.Context, dto *dto.CategoryDto) (*dto.CategoryDto, error)
 	GetAll(ctx context.Context) (dto.GetCategoriesResponse, error)
 }
 
-func (s *CategoriesService) Create(ctx context.Context, dto *dto.CategoryDto) error {
+func (s *CategoriesService) Create(ctx context.Context, dto *dto.CategoryDto) (*dto.CategoryDto, error) {
 	category := &models.Category{
 		Name: dto.Name,
 	}
-	return s.client.Create(ctx, category)
+
+	result, err := s.clients.Categories.Create(ctx, category)
+	if err != nil {
+		return nil, err
+	}
+
+	dto.Name = result.Name
+
+	return dto, nil
 }
 
 func (s *CategoriesService) GetAll(ctx context.Context) (dto.GetCategoriesResponse, error) {
-	cats, err := s.client.GetAll(ctx)
+	cats, err := s.clients.Categories.GetAll(ctx)
 	if err != nil {
 		return nil, err
 	}

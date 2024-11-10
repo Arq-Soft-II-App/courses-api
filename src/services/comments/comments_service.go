@@ -2,7 +2,7 @@ package comments
 
 import (
 	"context"
-	"courses-api/src/clients/comments"
+	"courses-api/src/clients"
 	Comments_Dto "courses-api/src/dto/comments"
 	"courses-api/src/models"
 
@@ -10,12 +10,12 @@ import (
 )
 
 type CommentsService struct {
-	client comments.CommentsClientInterface
+	clients *clients.Clients
 }
 
-func NewCommentsService(client comments.CommentsClientInterface) CommentsInterface {
+func NewCommentsService(clients *clients.Clients) CommentsInterface {
 	return &CommentsService{
-		client: client,
+		clients: clients,
 	}
 }
 
@@ -26,10 +26,7 @@ type CommentsInterface interface {
 }
 
 func (s *CommentsService) NewComment(ctx context.Context, dto *Comments_Dto.CommentsDto) (*Comments_Dto.CommentResponse, error) {
-	courseID, err := primitive.ObjectIDFromHex(dto.CourseId.Hex())
-	if err != nil {
-		return nil, err
-	}
+	courseID := dto.CourseId
 
 	comment := &models.Comment{
 		Text:     dto.Text,
@@ -37,7 +34,7 @@ func (s *CommentsService) NewComment(ctx context.Context, dto *Comments_Dto.Comm
 		UserId:   dto.UserId,
 	}
 
-	createdComment, err := s.client.NewComment(ctx, comment)
+	createdComment, err := s.clients.Comments.NewComment(ctx, comment)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +51,7 @@ func (s *CommentsService) GetCourseComments(ctx context.Context, courseID string
 		return nil, err
 	}
 
-	comments, err := s.client.GetCourseComments(ctx, courseObjectID)
+	comments, err := s.clients.Comments.GetCourseComments(ctx, courseObjectID)
 	if err != nil {
 		return nil, err
 	}
@@ -71,18 +68,15 @@ func (s *CommentsService) GetCourseComments(ctx context.Context, courseID string
 }
 
 func (s *CommentsService) UpdateComment(ctx context.Context, dto *Comments_Dto.CommentsDto) (*Comments_Dto.CommentResponse, error) {
-	CourseId, err := primitive.ObjectIDFromHex(dto.CourseId.Hex())
-	if err != nil {
-		return nil, err
-	}
+	courseID := dto.CourseId
 
 	comment := models.Comment{
 		Text:     dto.Text,
 		UserId:   dto.UserId,
-		CourseId: CourseId,
+		CourseId: courseID,
 	}
 
-	updatedComment, err := s.client.UpdateComment(ctx, comment)
+	updatedComment, err := s.clients.Comments.UpdateComment(ctx, comment)
 	if err != nil {
 		return nil, err
 	}

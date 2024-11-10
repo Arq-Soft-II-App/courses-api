@@ -2,19 +2,19 @@ package ratings
 
 import (
 	dto "courses-api/src/dto/ratings"
-	"courses-api/src/services/ratings"
+	"courses-api/src/services"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 type RatingsController struct {
-	service ratings.RatingsInterface
+	services *services.Services
 }
 
-func NewRatingsController(service ratings.RatingsInterface) *RatingsController {
+func NewRatingsController(services *services.Services) RatingsControllerInterface {
 	return &RatingsController{
-		service: service,
+		services: services,
 	}
 }
 
@@ -31,7 +31,7 @@ func (rc *RatingsController) NewRating(c *gin.Context) {
 		return
 	}
 
-	newRating, err := rc.service.NewRating(c.Request.Context(), &ratingDTO)
+	newRating, err := rc.services.Ratings.NewRating(c.Request.Context(), &ratingDTO)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -47,7 +47,7 @@ func (rc *RatingsController) UpdateRating(c *gin.Context) {
 		return
 	}
 
-	updatedRating, err := rc.service.UpdateRating(c.Request.Context(), &ratingDTO)
+	updatedRating, err := rc.services.Ratings.UpdateRating(c.Request.Context(), &ratingDTO)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -58,7 +58,7 @@ func (rc *RatingsController) UpdateRating(c *gin.Context) {
 
 func (rc *RatingsController) GetCourseRating(c *gin.Context) {
 	courseID := c.Param("id")
-	rating, err := rc.service.GetCourseRating(c.Request.Context(), courseID)
+	rating, err := rc.services.Ratings.GetCourseRating(c.Request.Context(), courseID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

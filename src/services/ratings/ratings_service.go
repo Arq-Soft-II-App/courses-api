@@ -2,7 +2,7 @@ package ratings
 
 import (
 	"context"
-	"courses-api/src/clients/ratings"
+	"courses-api/src/clients"
 	Ratings_Dto "courses-api/src/dto/ratings"
 	"courses-api/src/models"
 
@@ -10,12 +10,12 @@ import (
 )
 
 type RatingsService struct {
-	client ratings.RatingsClientInterface
+	clients *clients.Clients
 }
 
-func NewRatingsService(client ratings.RatingsClientInterface) RatingsInterface {
+func NewRatingsService(clients *clients.Clients) RatingsInterface {
 	return &RatingsService{
-		client: client,
+		clients: clients,
 	}
 }
 
@@ -34,7 +34,7 @@ func (s *RatingsService) NewRating(ctx context.Context, dto *Ratings_Dto.RatingR
 		Rating:   dto.Rating,
 	}
 
-	createdRating, err := s.client.NewRating(ctx, rating)
+	createdRating, err := s.clients.Ratings.NewRating(ctx, rating)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func (s *RatingsService) UpdateRating(ctx context.Context, dto *Ratings_Dto.Rati
 		Rating:   dto.Rating,
 	}
 
-	updatedRating, err := s.client.UpdateRating(ctx, rating)
+	updatedRating, err := s.clients.Ratings.UpdateRating(ctx, rating)
 	if err != nil {
 		return nil, err
 	}
@@ -73,13 +73,27 @@ func (s *RatingsService) GetCourseRating(ctx context.Context, courseID string) (
 		return nil, err
 	}
 
-	rating, err := s.client.GetRatings(ctx, courseObjectID)
+	ratings, err := s.clients.Ratings.GetRatings(ctx, courseObjectID)
 	if err != nil {
 		return nil, err
 	}
 
+	if len(ratings) == 0 {
+		return &Ratings_Dto.GetCourseRatingResponseDto{
+			CourseId: courseObjectID,
+			Rating:   0,
+		}, nil
+	}
+
+	// Calcula el promedio
+	total := 0
+	for _, r := range ratings {
+		total += r.Rating
+	}
+	averageRating := total / len(ratings)
+
 	return &Ratings_Dto.GetCourseRatingResponseDto{
-		CourseId: rating.CourseID,
-		Rating:   rating.Rating,
+		CourseId: courseObjectID,
+		Rating:   averageRating,
 	}, nil
 }

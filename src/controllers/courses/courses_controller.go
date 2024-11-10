@@ -2,14 +2,14 @@ package courses
 
 import (
 	dto "courses-api/src/dto/courses"
-	"courses-api/src/services/courses"
+	"courses-api/src/services"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 type CoursesController struct {
-	service courses.CourseInterface
+	services *services.Services
 }
 
 type CoursesControllerInterface interface {
@@ -20,9 +20,9 @@ type CoursesControllerInterface interface {
 	DeleteCourse(ctx *gin.Context)
 }
 
-func NewCoursesController(service courses.CourseInterface) CoursesControllerInterface {
+func NewCoursesController(services *services.Services) CoursesControllerInterface {
 	return &CoursesController{
-		service: service,
+		services: services,
 	}
 }
 
@@ -33,7 +33,7 @@ func (c *CoursesController) CreateCourse(ctx *gin.Context) {
 		return
 	}
 
-	result, err := c.service.Create(ctx, &courseDto)
+	result, err := c.services.Courses.Create(ctx, &courseDto)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -43,7 +43,7 @@ func (c *CoursesController) CreateCourse(ctx *gin.Context) {
 }
 
 func (c *CoursesController) GetAllCourses(ctx *gin.Context) {
-	courses, err := c.service.GetAll(ctx)
+	courses, err := c.services.Courses.GetAll(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -54,7 +54,7 @@ func (c *CoursesController) GetAllCourses(ctx *gin.Context) {
 
 func (c *CoursesController) GetCourseById(ctx *gin.Context) {
 	id := ctx.Param("id")
-	course, err := c.service.GetById(ctx, id)
+	course, err := c.services.Courses.GetById(ctx, id)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -71,7 +71,7 @@ func (c *CoursesController) UpdateCourse(ctx *gin.Context) {
 	}
 
 	courseDto.Id = ctx.Param("id")
-	result, err := c.service.Update(ctx, &courseDto)
+	result, err := c.services.Courses.Update(ctx, &courseDto)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -82,7 +82,7 @@ func (c *CoursesController) UpdateCourse(ctx *gin.Context) {
 
 func (c *CoursesController) DeleteCourse(ctx *gin.Context) {
 	id := ctx.Param("id")
-	result, err := c.service.Delete(ctx, id)
+	result, err := c.services.Courses.Delete(ctx, id)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

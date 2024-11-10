@@ -17,9 +17,9 @@ type Controllers struct {
 
 func NewControllers(services *services.Services) *Controllers {
 	return &Controllers{
-		Categories: categories.NewCategoriesController(services.Categories),
-		Courses:    courses.NewCoursesController(services.Courses),
-		Comments:   comments.NewCommentsController(services.Comments),
-		Ratings:    ratings.NewRatingsController(services.Ratings),
+		Categories: categories.NewCategoriesController(services),
+		Courses:    courses.NewCoursesController(services),
+		Comments:   comments.NewCommentsController(services),
+		Ratings:    ratings.NewRatingsController(services),
 	}
 }

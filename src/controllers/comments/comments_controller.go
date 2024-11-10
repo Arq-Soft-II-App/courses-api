@@ -2,26 +2,26 @@ package comments
 
 import (
 	dto "courses-api/src/dto/comments"
-	"courses-api/src/services/comments"
+	"courses-api/src/services"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 type CommentsController struct {
-	service comments.CommentsInterface
-}
-
-func NewCommentsController(service comments.CommentsInterface) *CommentsController {
-	return &CommentsController{
-		service: service,
-	}
+	services *services.Services
 }
 
 type CommentsControllerInterface interface {
 	NewComment(c *gin.Context)
 	GetCourseComments(c *gin.Context)
 	UpdateComment(c *gin.Context)
+}
+
+func NewCommentsController(services *services.Services) CommentsControllerInterface {
+	return &CommentsController{
+		services: services,
+	}
 }
 
 func (cc *CommentsController) NewComment(c *gin.Context) {
@@ -31,7 +31,7 @@ func (cc *CommentsController) NewComment(c *gin.Context) {
 		return
 	}
 
-	newComment, err := cc.service.NewComment(c.Request.Context(), &commentDTO)
+	newComment, err := cc.services.Comments.NewComment(c.Request.Context(), &commentDTO)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -42,7 +42,7 @@ func (cc *CommentsController) NewComment(c *gin.Context) {
 
 func (cc *CommentsController) GetCourseComments(c *gin.Context) {
 	courseID := c.Param("course_id")
-	comments, err := cc.service.GetCourseComments(c.Request.Context(), courseID)
+	comments, err := cc.services.Comments.GetCourseComments(c.Request.Context(), courseID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -58,7 +58,7 @@ func (cc *CommentsController) UpdateComment(c *gin.Context) {
 		return
 	}
 
-	updatedComment, err := cc.service.UpdateComment(c.Request.Context(), &commentDTO)
+	updatedComment, err := cc.services.Comments.UpdateComment(c.Request.Context(), &commentDTO)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
