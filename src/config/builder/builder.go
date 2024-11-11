@@ -4,6 +4,7 @@ import (
 	"courses-api/src/clients"
 	"courses-api/src/config/db"
 	"courses-api/src/config/envs"
+	rabbitmq "courses-api/src/config/rabbitMQ"
 	"courses-api/src/controllers"
 	"courses-api/src/routes"
 	"courses-api/src/services"
@@ -21,6 +22,7 @@ type AppBuilder struct {
 	controllers *controllers.Controllers
 	router      *gin.Engine
 	envs        envs.Envs
+	rabbitMQ    *rabbitmq.RabbitMQ // Campo agregado
 }
 
 func NewAppBuilder() *AppBuilder {
@@ -32,6 +34,7 @@ func BuildApp() *AppBuilder {
 	builder.envs = envs.LoadEnvs()
 	return builder.
 		BuildDBConnection().
+		BuildRabbitMQConnection(). // Método agregado
 		BuildClients().
 		BuildServices().
 		BuildControllers().
@@ -48,13 +51,18 @@ func (b *AppBuilder) BuildDBConnection() *AppBuilder {
 	return b
 }
 
+func (b *AppBuilder) BuildRabbitMQConnection() *AppBuilder {
+	b.rabbitMQ = rabbitmq.NewRabbitMQ()
+	return b
+}
+
 func (b *AppBuilder) BuildClients() *AppBuilder {
 	b.clients = clients.NewClients(b.database)
 	return b
 }
 
 func (b *AppBuilder) BuildServices() *AppBuilder {
-	b.services = services.NewServices(b.clients)
+	b.services = services.NewServices(b.clients, b.rabbitMQ)
 	return b
 }
 
@@ -76,7 +84,7 @@ func (b *AppBuilder) GetRouter() *gin.Engine {
 func (b *AppBuilder) GetPort() string {
 	port := b.envs.Get("PORT")
 	if port == "" {
-		port = "8080"
+		port = "4002"
 	}
 	return ":" + port
 }

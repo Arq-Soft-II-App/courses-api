@@ -3,19 +3,23 @@ package comments
 import (
 	"context"
 	"courses-api/src/clients"
+	rabbitmq "courses-api/src/config/rabbitMQ"
 	Comments_Dto "courses-api/src/dto/comments"
 	"courses-api/src/models"
+	"log"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type CommentsService struct {
-	clients *clients.Clients
+	clients  *clients.Clients
+	rabbitMQ *rabbitmq.RabbitMQ
 }
 
-func NewCommentsService(clients *clients.Clients) CommentsInterface {
+func NewCommentsService(clients *clients.Clients, rabbitMQ *rabbitmq.RabbitMQ) CommentsInterface {
 	return &CommentsService{
-		clients: clients,
+		clients:  clients,
+		rabbitMQ: rabbitMQ,
 	}
 }
 
@@ -37,6 +41,11 @@ func (s *CommentsService) NewComment(ctx context.Context, dto *Comments_Dto.Comm
 	createdComment, err := s.clients.Comments.NewComment(ctx, comment)
 	if err != nil {
 		return nil, err
+	}
+
+	err = s.rabbitMQ.PublishMessage(createdComment.CourseId.Hex())
+	if err != nil {
+		log.Printf("Error al publicar mensaje en RabbitMQ: %v", err)
 	}
 
 	return &Comments_Dto.CommentResponse{

@@ -2,6 +2,7 @@ package services
 
 import (
 	"courses-api/src/clients"
+	rabbitmq "courses-api/src/config/rabbitMQ"
 	"courses-api/src/services/categories"
 	"courses-api/src/services/comments"
 	"courses-api/src/services/courses"
@@ -15,11 +16,11 @@ type Services struct {
 	Ratings    ratings.RatingsInterface
 }
 
-func NewServices(clients *clients.Clients) *Services {
+func NewServices(clients *clients.Clients, rabbitMQ *rabbitmq.RabbitMQ) *Services {
 	return &Services{
 		Categories: categories.NewCategoriesService(clients),
-		Courses:    courses.NewCoursesService(clients),
-		Comments:   comments.NewCommentsService(clients),
-		Ratings:    ratings.NewRatingsService(clients),
+		Courses:    courses.NewCoursesService(clients, rabbitMQ),
+		Comments:   comments.NewCommentsService(clients, rabbitMQ),
+		Ratings:    ratings.NewRatingsService(clients, rabbitMQ),
 	}
 }

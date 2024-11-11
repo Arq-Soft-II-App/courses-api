@@ -3,8 +3,10 @@ package courses
 import (
 	"context"
 	"courses-api/src/clients"
+	rabbitmq "courses-api/src/config/rabbitMQ"
 	dto "courses-api/src/dto/courses"
 	"courses-api/src/models"
+	"log"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -18,12 +20,14 @@ type CourseInterface interface {
 }
 
 type CoursesService struct {
-	clients *clients.Clients
+	clients  *clients.Clients
+	rabbitMQ *rabbitmq.RabbitMQ
 }
 
-func NewCoursesService(clients *clients.Clients) CourseInterface {
+func NewCoursesService(clients *clients.Clients, rabbitMQ *rabbitmq.RabbitMQ) CourseInterface {
 	return &CoursesService{
-		clients: clients,
+		clients:  clients,
+		rabbitMQ: rabbitMQ,
 	}
 }
 
@@ -59,6 +63,12 @@ func (s *CoursesService) Create(ctx context.Context, courseDto *dto.CreateCourse
 	createdCourse, err := s.clients.Courses.Create(ctx, course)
 	if err != nil {
 		return nil, err
+	}
+
+	// Publicar mensaje en RabbitMQ
+	err = s.rabbitMQ.PublishMessage(createdCourse.Id.Hex())
+	if err != nil {
+		log.Printf("Error al publicar mensaje en RabbitMQ: %v", err)
 	}
 
 	return &dto.CreateCoursesResponseDto{
@@ -141,6 +151,12 @@ func (s *CoursesService) Update(ctx context.Context, courseDto *dto.UpdateCourse
 		return nil, err
 	}
 
+	// Publicar mensaje en RabbitMQ
+	err = s.rabbitMQ.PublishMessage(updatedCourseResult.Id.Hex())
+	if err != nil {
+		log.Printf("Error al publicar mensaje en RabbitMQ: %v", err)
+	}
+
 	return &dto.GetCourseDto{
 		Id:                 updatedCourseResult.Id.Hex(),
 		BaseCourseDto:      mapCourseToBaseDto(*updatedCourseResult),
@@ -155,7 +171,18 @@ func (s *CoursesService) Delete(ctx context.Context, id string) (string, error) 
 		return "", err
 	}
 
-	return s.clients.Courses.Delete(ctx, objectId)
+	result, err := s.clients.Courses.Delete(ctx, objectId)
+	if err != nil {
+		return "", err
+	}
+
+	// Publicar mensaje en RabbitMQ
+	err = s.rabbitMQ.PublishMessage(id)
+	if err != nil {
+		log.Printf("Error al publicar mensaje en RabbitMQ: %v", err)
+	}
+
+	return result, nil
 }
 
 func mapCourseToBaseDto(course models.Course) dto.BaseCourseDto {

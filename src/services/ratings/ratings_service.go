@@ -3,19 +3,23 @@ package ratings
 import (
 	"context"
 	"courses-api/src/clients"
+	rabbitmq "courses-api/src/config/rabbitMQ"
 	Ratings_Dto "courses-api/src/dto/ratings"
 	"courses-api/src/models"
+	"log"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type RatingsService struct {
-	clients *clients.Clients
+	clients  *clients.Clients
+	rabbitMQ *rabbitmq.RabbitMQ
 }
 
-func NewRatingsService(clients *clients.Clients) RatingsInterface {
+func NewRatingsService(clients *clients.Clients, rabbitMQ *rabbitmq.RabbitMQ) RatingsInterface {
 	return &RatingsService{
-		clients: clients,
+		clients:  clients,
+		rabbitMQ: rabbitMQ,
 	}
 }
 
@@ -39,6 +43,12 @@ func (s *RatingsService) NewRating(ctx context.Context, dto *Ratings_Dto.RatingR
 		return nil, err
 	}
 
+	// Publicar mensaje en RabbitMQ
+	err = s.rabbitMQ.PublishMessage(createdRating.CourseID.Hex())
+	if err != nil {
+		log.Printf("Error al publicar mensaje en RabbitMQ: %v", err)
+	}
+
 	return &Ratings_Dto.RatingRequestResponseDto{
 		CourseId: createdRating.CourseID,
 		UserId:   createdRating.UserID,
@@ -58,6 +68,12 @@ func (s *RatingsService) UpdateRating(ctx context.Context, dto *Ratings_Dto.Rati
 	updatedRating, err := s.clients.Ratings.UpdateRating(ctx, rating)
 	if err != nil {
 		return nil, err
+	}
+
+	// Publicar mensaje en RabbitMQ
+	err = s.rabbitMQ.PublishMessage(updatedRating.CourseID.Hex())
+	if err != nil {
+		log.Printf("Error al publicar mensaje en RabbitMQ: %v", err)
 	}
 
 	return &Ratings_Dto.RatingRequestResponseDto{
