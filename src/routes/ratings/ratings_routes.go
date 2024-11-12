@@ -8,6 +8,6 @@ import (
 
 func RatingsRoutes(g *gin.RouterGroup, controller controllers.Controllers) {
 	g.POST("/", controller.Ratings.NewRating)
-	g.GET("/:id", controller.Ratings.GetCourseRating)
+	g.GET("/", controller.Ratings.GetAllRatings)
 	g.PUT("/", controller.Ratings.UpdateRating)
 }

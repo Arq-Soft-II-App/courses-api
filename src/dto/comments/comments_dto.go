@@ -10,8 +10,9 @@ type CommentsDto struct {
 }
 
 type CommentResponse struct {
-	Text   string `json:"text"`
-	UserId string `json:"user_id"`
+	CourseId primitive.ObjectID `json:"course_id"`
+	Text     string             `json:"text"`
+	UserId   string             `json:"user_id"`
 }
 
 type GetCommentsResponse []CommentResponse

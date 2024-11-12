@@ -1,12 +1,12 @@
 package categories
 
 type CategoryDto struct {
-	Name string `json:"name"`
+	Category_Name string `json:"category_name"`
 }
 
 type CategoryResponse struct {
-	ID   string `json:"_id"`
-	Name string `json:"name"`
+	ID            string `json:"category_id"`
+	Category_Name string `json:"category_name"`
 }
 
 type GetCategoriesResponse []CategoryResponse

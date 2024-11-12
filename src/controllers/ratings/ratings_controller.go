@@ -21,7 +21,7 @@ func NewRatingsController(services *services.Services) RatingsControllerInterfac
 type RatingsControllerInterface interface {
 	NewRating(c *gin.Context)
 	UpdateRating(c *gin.Context)
-	GetCourseRating(c *gin.Context)
+	GetAllRatings(c *gin.Context)
 }
 
 func (rc *RatingsController) NewRating(c *gin.Context) {
@@ -56,9 +56,8 @@ func (rc *RatingsController) UpdateRating(c *gin.Context) {
 	c.JSON(http.StatusOK, updatedRating)
 }
 
-func (rc *RatingsController) GetCourseRating(c *gin.Context) {
-	courseID := c.Param("id")
-	rating, err := rc.services.Ratings.GetCourseRating(c.Request.Context(), courseID)
+func (rc *RatingsController) GetAllRatings(c *gin.Context) {
+	rating, err := rc.services.Ratings.GetAllRatings(c.Request.Context())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

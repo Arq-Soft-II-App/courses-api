@@ -24,7 +24,7 @@ func NewRatingsClient(db *mongo.Database) *RatingsClient {
 type RatingsClientInterface interface {
 	NewRating(ctx context.Context, rating models.Rating) (models.Rating, error)
 	UpdateRating(ctx context.Context, rating models.Rating) (models.Rating, error)
-	GetRatings(ctx context.Context, courseID primitive.ObjectID) (models.Ratings, error)
+	GetRatings(ctx context.Context) (models.Ratings, error)
 }
 
 func (c *RatingsClient) NewRating(ctx context.Context, rating models.Rating) (models.Rating, error) {
@@ -53,9 +53,8 @@ func (c *RatingsClient) UpdateRating(ctx context.Context, rating models.Rating) 
 	return updatedRating, nil
 }
 
-func (c *RatingsClient) GetRatings(ctx context.Context, courseID primitive.ObjectID) (models.Ratings, error) {
-	filter := bson.M{"course_id": courseID}
-	cursor, err := c.collection.Find(ctx, filter)
+func (c *RatingsClient) GetRatings(ctx context.Context) (models.Ratings, error) {
+	cursor, err := c.collection.Find(ctx, bson.M{})
 	if err != nil {
 		return nil, errors.NewError("INTERNAL_SERVER_ERROR", "Error al obtener los ratings del curso", 500)
 	}

@@ -7,8 +7,6 @@ import (
 	Ratings_Dto "courses-api/src/dto/ratings"
 	"courses-api/src/models"
 	"log"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type RatingsService struct {
@@ -26,7 +24,7 @@ func NewRatingsService(clients *clients.Clients, rabbitMQ *rabbitmq.RabbitMQ) Ra
 type RatingsInterface interface {
 	NewRating(ctx context.Context, dto *Ratings_Dto.RatingRequestResponseDto) (*Ratings_Dto.RatingRequestResponseDto, error)
 	UpdateRating(ctx context.Context, dto *Ratings_Dto.RatingRequestResponseDto) (*Ratings_Dto.RatingRequestResponseDto, error)
-	GetCourseRating(ctx context.Context, courseID string) (*Ratings_Dto.GetCourseRatingResponseDto, error)
+	GetAllRatings(ctx context.Context) (*Ratings_Dto.RatingsResponse, error)
 }
 
 func (s *RatingsService) NewRating(ctx context.Context, dto *Ratings_Dto.RatingRequestResponseDto) (*Ratings_Dto.RatingRequestResponseDto, error) {
@@ -83,33 +81,20 @@ func (s *RatingsService) UpdateRating(ctx context.Context, dto *Ratings_Dto.Rati
 	}, nil
 }
 
-func (s *RatingsService) GetCourseRating(ctx context.Context, courseID string) (*Ratings_Dto.GetCourseRatingResponseDto, error) {
-	courseObjectID, err := primitive.ObjectIDFromHex(courseID)
+func (s *RatingsService) GetAllRatings(ctx context.Context) (*Ratings_Dto.RatingsResponse, error) {
+	ratings, err := s.clients.Ratings.GetRatings(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	ratings, err := s.clients.Ratings.GetRatings(ctx, courseObjectID)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(ratings) == 0 {
-		return &Ratings_Dto.GetCourseRatingResponseDto{
-			CourseId: courseObjectID,
-			Rating:   0,
-		}, nil
-	}
-
-	// Calcula el promedio
-	total := 0
+	var response Ratings_Dto.RatingsResponse
 	for _, r := range ratings {
-		total += r.Rating
+		response = append(response, Ratings_Dto.RatingRequestResponseDto{
+			CourseId: r.CourseID,
+			UserId:   r.UserID,
+			Rating:   r.Rating,
+		})
 	}
-	averageRating := total / len(ratings)
 
-	return &Ratings_Dto.GetCourseRatingResponseDto{
-		CourseId: courseObjectID,
-		Rating:   averageRating,
-	}, nil
+	return &response, nil
 }

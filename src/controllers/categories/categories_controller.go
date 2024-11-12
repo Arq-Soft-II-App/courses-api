@@ -5,6 +5,7 @@ import (
 	appErrors "courses-api/src/errors"
 	"courses-api/src/services"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -26,18 +27,19 @@ func NewCategoriesController(services *services.Services) CategoriesControllerIn
 }
 
 func (c *CategoriesController) CreateCategory(ctx *gin.Context) {
+	fmt.Println("CreateCategory controller")
 	var categoryDto dto.CategoryDto
 	if err := ctx.ShouldBindJSON(&categoryDto); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	if categoryDto.Name == "" {
+	if categoryDto.Category_Name == "" {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "El nombre de la categoría es requerido"})
 		return
 	}
 
-	if len(categoryDto.Name) <= 4 {
+	if len(categoryDto.Category_Name) <= 4 {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "El nombre de la categoría debe tener al menos 4 caracteres"})
 		return
 	}
@@ -57,6 +59,7 @@ func (c *CategoriesController) CreateCategory(ctx *gin.Context) {
 }
 
 func (c *CategoriesController) GetCategories(ctx *gin.Context) {
+	fmt.Println("GetCategories controller")
 	categories, err := c.services.Categories.GetAll(ctx)
 	if err != nil {
 		var appErr *appErrors.Error

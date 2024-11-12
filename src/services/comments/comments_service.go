@@ -49,8 +49,9 @@ func (s *CommentsService) NewComment(ctx context.Context, dto *Comments_Dto.Comm
 	}
 
 	return &Comments_Dto.CommentResponse{
-		Text:   createdComment.Text,
-		UserId: createdComment.UserId,
+		CourseId: createdComment.CourseId,
+		Text:     createdComment.Text,
+		UserId:   createdComment.UserId,
 	}, nil
 }
 
@@ -68,8 +69,9 @@ func (s *CommentsService) GetCourseComments(ctx context.Context, courseID string
 	response := make(Comments_Dto.GetCommentsResponse, len(comments))
 	for i, comment := range comments {
 		response[i] = Comments_Dto.CommentResponse{
-			Text:   comment.Text,
-			UserId: comment.UserId,
+			CourseId: comment.CourseId,
+			Text:     comment.Text,
+			UserId:   comment.UserId,
 		}
 	}
 
@@ -91,7 +93,8 @@ func (s *CommentsService) UpdateComment(ctx context.Context, dto *Comments_Dto.C
 	}
 
 	return &Comments_Dto.CommentResponse{
-		Text:   updatedComment.Text,
-		UserId: updatedComment.UserId,
+		CourseId: updatedComment.CourseId,
+		Text:     updatedComment.Text,
+		UserId:   updatedComment.UserId,
 	}, nil
 }
