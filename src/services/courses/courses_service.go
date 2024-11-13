@@ -17,6 +17,7 @@ type CourseInterface interface {
 	GetById(ctx context.Context, id string) (*dto.GetCourseDto, error)
 	Update(ctx context.Context, courseDto *dto.UpdateCourseDto) (*dto.GetCourseDto, error)
 	Delete(ctx context.Context, id string) (string, error)
+	GetCourseList(ctx context.Context, ids []string) ([]dto.CourseListDto, error)
 }
 
 type CoursesService struct {
@@ -29,6 +30,33 @@ func NewCoursesService(clients *clients.Clients, rabbitMQ *rabbitmq.RabbitMQ) Co
 		clients:  clients,
 		rabbitMQ: rabbitMQ,
 	}
+}
+
+func (s *CoursesService) GetCourseList(ctx context.Context, ids []string) ([]dto.CourseListDto, error) {
+	courses, err := s.clients.Courses.GetCourseList(ctx, ids)
+	if err != nil {
+		return nil, err
+	}
+
+	var courseResponses []dto.CourseListDto
+	for _, course := range courses {
+		courseResponses = append(courseResponses, dto.CourseListDto{
+			Id:           course.Id.Hex(),
+			CategoryID:   course.CategoryID.Hex(),
+			CourseName:   course.CourseName,
+			Description:  course.CourseDescription,
+			Price:        course.CoursePrice,
+			Duration:     course.CourseDuration,
+			Capacity:     course.CourseCapacity,
+			InitDate:     course.CourseInitDate,
+			State:        course.CourseState,
+			Image:        course.CourseImage,
+			CategoryName: course.CategoryName,
+			RatingAvg:    course.RatingAvg,
+		})
+	}
+
+	return courseResponses, nil
 }
 
 func (s *CoursesService) Create(ctx context.Context, courseDto *dto.CreateCoursesRequestDto) (*dto.CreateCoursesResponseDto, error) {

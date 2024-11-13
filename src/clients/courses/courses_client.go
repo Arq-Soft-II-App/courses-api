@@ -22,6 +22,7 @@ type CourseClientInterface interface {
 	GetById(ctx context.Context, id primitive.ObjectID) (*models.Course, error)
 	Update(ctx context.Context, id primitive.ObjectID, course models.Course) (*models.Course, error)
 	Delete(ctx context.Context, id primitive.ObjectID) (string, error)
+	GetCourseList(ctx context.Context, ids []string) (models.Courses, error)
 }
 
 func NewCourseClient(db *mongo.Database) CourseClientInterface {
@@ -120,6 +121,34 @@ func (c *CourseClient) Delete(ctx context.Context, id primitive.ObjectID) (strin
 		return "", errors.NewError("COURSE_DELETE_FAILED", fmt.Sprintf("Error al eliminar el curso: %v", err), 500)
 	}
 	return fmt.Sprintf("Curso %s eliminado", id.Hex()), nil
+}
+
+func (c *CourseClient) GetCourseList(ctx context.Context, ids []string) (models.Courses, error) {
+	var objectIds []primitive.ObjectID
+	for _, id := range ids {
+		objectId, err := primitive.ObjectIDFromHex(id)
+		if err != nil {
+			return nil, errors.NewError("INVALID_OBJECT_ID", fmt.Sprintf("ID inválido: %v", err), 400)
+		}
+		objectIds = append(objectIds, objectId)
+	}
+
+	matchStage := bson.D{{Key: "$match", Value: bson.M{"_id": bson.M{"$in": objectIds}}}}
+
+	pipeline := c.buildCoursePipeline(matchStage)
+
+	cursor, err := c.collection.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, errors.NewError("COURSE_FETCH_FAILED", fmt.Sprintf("Error al obtener cursos: %v", err), 500)
+	}
+	defer cursor.Close(ctx)
+
+	var courses models.Courses
+	if err := cursor.All(ctx, &courses); err != nil {
+		return nil, errors.NewError("COURSE_DECODE_FAILED", fmt.Sprintf("Error al decodificar cursos: %v", err), 500)
+	}
+
+	return courses, nil
 }
 
 // buildCoursePipeline construye el pipeline de agregación para obtener cursos.

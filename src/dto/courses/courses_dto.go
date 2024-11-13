@@ -38,3 +38,18 @@ type UpdateCourseDto struct {
 	Id string `json:"_id"`
 	BaseCourseDto
 }
+
+type CourseListDto struct {
+	Id           string  `json:"id"`
+	CategoryID   string  `json:"category_id"`
+	CourseName   string  `json:"course_name"`
+	Description  string  `json:"description"`
+	Price        float64 `json:"price"`
+	Duration     int     `json:"duration"`
+	Capacity     int     `json:"capacity"`
+	InitDate     string  `json:"init_date"`
+	State        bool    `json:"state"`
+	Image        string  `json:"image"`
+	CategoryName string  `json:"category_name"`
+	RatingAvg    float64 `json:"ratingavg"`
+}
