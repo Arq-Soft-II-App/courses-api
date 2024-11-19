@@ -5,6 +5,7 @@ import (
 	"courses-api/src/errors"
 	"courses-api/src/models"
 	"fmt"
+	"strings"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -126,20 +127,28 @@ func (c *CourseClient) Delete(ctx context.Context, id primitive.ObjectID) (strin
 func (c *CourseClient) GetCourseList(ctx context.Context, ids []string) (models.Courses, error) {
 	var objectIds []primitive.ObjectID
 	for _, id := range ids {
-		objectId, err := primitive.ObjectIDFromHex(id)
+		cleanID := strings.TrimSpace(id)
+		if cleanID == "" {
+			continue
+		}
+
+		objectId, err := primitive.ObjectIDFromHex(cleanID)
 		if err != nil {
-			return nil, errors.NewError("INVALID_OBJECT_ID", fmt.Sprintf("ID inválido: %v", err), 400)
+			return nil, errors.NewError("INVALID_OBJECT_ID", fmt.Sprintf("ID inválido %s: %v", cleanID, err), 400)
 		}
 		objectIds = append(objectIds, objectId)
 	}
 
-	matchStage := bson.D{{Key: "$match", Value: bson.M{"_id": bson.M{"$in": objectIds}}}}
+	if len(objectIds) == 0 {
+		return models.Courses{}, nil
+	}
 
+	matchStage := bson.D{{Key: "$match", Value: bson.M{"_id": bson.M{"$in": objectIds}}}}
 	pipeline := c.buildCoursePipeline(matchStage)
 
 	cursor, err := c.collection.Aggregate(ctx, pipeline)
 	if err != nil {
-		return nil, errors.NewError("COURSE_FETCH_FAILED", fmt.Sprintf("Error al obtener cursos: %v", err), 500)
+		return nil, errors.NewError("COURSE_FETCH_FAILED", fmt.Sprintf("Error en agregación de MongoDB: %v", err), 500)
 	}
 	defer cursor.Close(ctx)
 

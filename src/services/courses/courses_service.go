@@ -6,6 +6,7 @@ import (
 	rabbitmq "courses-api/src/config/rabbitMQ"
 	dto "courses-api/src/dto/courses"
 	"courses-api/src/models"
+	"fmt"
 	"log"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -33,8 +34,11 @@ func NewCoursesService(clients *clients.Clients, rabbitMQ *rabbitmq.RabbitMQ) Co
 }
 
 func (s *CoursesService) GetCourseList(ctx context.Context, ids []string) ([]dto.CourseListDto, error) {
+	fmt.Printf("Service - Buscando cursos con IDs: %v\n", ids)
+
 	courses, err := s.clients.Courses.GetCourseList(ctx, ids)
 	if err != nil {
+		fmt.Printf("Error en client.GetCourseList: %v\n", err)
 		return nil, err
 	}
 

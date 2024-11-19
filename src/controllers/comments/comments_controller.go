@@ -2,6 +2,7 @@ package comments
 
 import (
 	dto "courses-api/src/dto/comments"
+	"courses-api/src/errors"
 	"courses-api/src/services"
 	"net/http"
 
@@ -44,7 +45,12 @@ func (cc *CommentsController) GetCourseComments(c *gin.Context) {
 	courseID := c.Param("course_id")
 	comments, err := cc.services.Comments.GetCourseComments(c.Request.Context(), courseID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		error := err.(*errors.Error)
+		if error.HTTPStatusCode == 404 {
+			c.JSON(http.StatusNotFound, gin.H{"error": error.Message})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
 		return
 	}
 

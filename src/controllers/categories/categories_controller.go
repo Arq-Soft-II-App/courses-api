@@ -44,7 +44,7 @@ func (c *CategoriesController) CreateCategory(ctx *gin.Context) {
 		return
 	}
 
-	_, err := c.services.Categories.Create(ctx, &categoryDto)
+	categoryResponse, err := c.services.Categories.Create(ctx, &categoryDto)
 	if err != nil {
 		var appErr *appErrors.Error
 		if errors.As(err, &appErr) {
@@ -55,7 +55,7 @@ func (c *CategoriesController) CreateCategory(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, gin.H{"message": `Categoría creada exitosamente`})
+	ctx.JSON(http.StatusCreated, categoryResponse)
 }
 
 func (c *CategoriesController) GetCategories(ctx *gin.Context) {

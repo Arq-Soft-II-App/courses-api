@@ -5,6 +5,7 @@ import (
 	"courses-api/src/clients"
 	rabbitmq "courses-api/src/config/rabbitMQ"
 	Comments_Dto "courses-api/src/dto/comments"
+	"courses-api/src/errors"
 	"courses-api/src/models"
 	"log"
 
@@ -63,6 +64,10 @@ func (s *CommentsService) GetCourseComments(ctx context.Context, courseID string
 
 	comments, err := s.clients.Comments.GetCourseComments(ctx, courseObjectID)
 	if err != nil {
+		error := err.(*errors.Error)
+		if error.HTTPStatusCode == 404 {
+			return nil, errors.NewError("COMMENT_NOT_FOUND", "No se encontraron comentarios para el curso", 404)
+		}
 		return nil, err
 	}
 

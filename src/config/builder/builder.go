@@ -22,7 +22,7 @@ type AppBuilder struct {
 	controllers *controllers.Controllers
 	router      *gin.Engine
 	envs        envs.Envs
-	rabbitMQ    *rabbitmq.RabbitMQ // Campo agregado
+	rabbitMQ    *rabbitmq.RabbitMQ
 }
 
 func NewAppBuilder() *AppBuilder {
@@ -34,7 +34,7 @@ func BuildApp() *AppBuilder {
 	builder.envs = envs.LoadEnvs()
 	return builder.
 		BuildDBConnection().
-		BuildRabbitMQConnection(). // Método agregado
+		BuildRabbitMQConnection().
 		BuildClients().
 		BuildServices().
 		BuildControllers().

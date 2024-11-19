@@ -50,6 +50,11 @@ func (c *CommentsClient) GetCourseComments(ctx context.Context, courseID primiti
 	if err = cursor.All(ctx, &comments); err != nil {
 		return nil, errors.NewError("COMMENT_DECODE_FAILED", fmt.Sprintf("Error al decodificar comentarios: %v", err), 500)
 	}
+
+	if len(comments) == 0 {
+		return nil, errors.NewError("COMMENT_NOT_FOUND", "No se encontraron comentarios para el curso", 404)
+	}
+
 	return comments, nil
 }
 

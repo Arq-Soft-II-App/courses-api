@@ -29,15 +29,18 @@ func NewCoursesController(services *services.Services) CoursesControllerInterfac
 }
 
 func (c *CoursesController) GetCourseList(ctx *gin.Context) {
+	fmt.Println("GetCourseList called")
 	var requestBody struct {
 		IDs []string `json:"ids" binding:"required"`
 	}
 
 	if err := ctx.ShouldBindJSON(&requestBody); err != nil {
+		fmt.Println("err", err)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Los IDs son requeridos y deben ser un array de strings"})
 		return
 	}
 
+	fmt.Println("requestBody", requestBody)
 	if len(requestBody.IDs) == 0 {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "La lista de IDs no puede estar vacía"})
 		return

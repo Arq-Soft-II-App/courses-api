@@ -19,24 +19,26 @@ func NewCategoriesService(clients *clients.Clients) CategoryInterface {
 }
 
 type CategoryInterface interface {
-	Create(ctx context.Context, dto *dto.CategoryDto) (*dto.CategoryDto, error)
+	Create(ctx context.Context, dto *dto.CategoryDto) (dto.CategoryResponse, error)
 	GetAll(ctx context.Context) (dto.GetCategoriesResponse, error)
 }
 
-func (s *CategoriesService) Create(ctx context.Context, dto *dto.CategoryDto) (*dto.CategoryDto, error) {
+func (s *CategoriesService) Create(ctx context.Context, categoryDto *dto.CategoryDto) (dto.CategoryResponse, error) {
 	fmt.Println("Create category service")
 	category := &models.Category{
-		Category_Name: dto.Category_Name,
+		Category_Name: categoryDto.Category_Name,
 	}
 
 	result, err := s.clients.Categories.Create(ctx, category)
 	if err != nil {
-		return nil, err
+		return dto.CategoryResponse{}, err
+	}
+	categoryResponse := dto.CategoryResponse{
+		ID:            result.ID.Hex(),
+		Category_Name: result.Category_Name,
 	}
 
-	dto.Category_Name = result.Category_Name
-
-	return dto, nil
+	return categoryResponse, nil
 }
 
 func (s *CategoriesService) GetAll(ctx context.Context) (dto.GetCategoriesResponse, error) {
