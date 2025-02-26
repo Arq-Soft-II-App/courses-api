@@ -11,22 +11,22 @@ import (
 )
 
 func SetupRoutes(router *gin.Engine, controller controllers.Controllers) {
-	categoriesRoutes := router.Group("/courses/categories")
+	categoriesRoutes := router.Group("/api_courses/categories")
 	{
 		categories.CategoriesRoutes(categoriesRoutes, controller)
 	}
 
-	commentsRoutes := router.Group("/courses/comments")
+	commentsRoutes := router.Group("/api_courses/comments")
 	{
 		comments.CommentsRoutes(commentsRoutes, controller)
 	}
 
-	ratingsRoutes := router.Group("/courses/ratings")
+	ratingsRoutes := router.Group("/api_courses/ratings")
 	{
 		ratings.RatingsRoutes(ratingsRoutes, controller)
 	}
 
-	coursesRoutes := router.Group("/courses")
+	coursesRoutes := router.Group("/api_courses")
 	{
 		courses.CoursesRoutes(coursesRoutes, controller)
 	}
